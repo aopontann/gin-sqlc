@@ -2,55 +2,31 @@ package main
 
 import (
 	"context"
-	"database/sql"
-	"log"
-	"reflect"
+	"fmt"
+	"os"
 
-	"github.com/aopontann/gin-sqlc/tutorial"
+	"github.com/aopontann/gin-sqlc/api"
 
-	_ "github.com/lib/pq"
+	"github.com/jackc/pgx/v5"
 )
 
-func run() error {
-	ctx := context.Background()
-
-	db, err := sql.Open("postgres", "user=postgres password=postgres dbname=postgres sslmode=disable")
-	if err != nil {
-		return err
-	}
-
-	queries := tutorial.New(db)
-
-	// list all authors
-	authors, err := queries.ListAuthors(ctx)
-	if err != nil {
-		return err
-	}
-	log.Println(authors)
-
-	// create an author
-	insertedAuthor, err := queries.CreateAuthor(ctx, tutorial.CreateAuthorParams{
-		Name: "Brian Kernighan",
-		Bio:  sql.NullString{String: "Co-author of The C Programming Language and The Go Programming Language", Valid: true},
-	})
-	if err != nil {
-		return err
-	}
-	log.Println(insertedAuthor)
-
-	// get the author we just inserted
-	fetchedAuthor, err := queries.GetAuthor(ctx, insertedAuthor.ID)
-	if err != nil {
-		return err
-	}
-
-	// prints true
-	log.Println(reflect.DeepEqual(insertedAuthor, fetchedAuthor))
-	return nil
-}
-
 func main() {
-	if err := run(); err != nil {
-		log.Fatal(err)
+
+	// DATABASE_URL := "postgres://username:password@localhost:5432/database_name"
+	conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+		os.Exit(1)
+	}
+	defer conn.Close(context.Background())
+
+	server := api.NewServer(conn)
+
+	server.MountHandlers()
+
+	err = server.Start(":8080")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to start up API server: %v\n", err)
+		os.Exit(1)
 	}
 }
