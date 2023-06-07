@@ -6,7 +6,8 @@
 	"service": "app",
 	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
 	"features": {
-		"ghcr.io/devcontainers-contrib/features/postgres-asdf:1": {}
+		"ghcr.io/devcontainers-contrib/features/postgres-asdf:1": {},
+		"ghcr.io/devcontainers-contrib/features/redis-homebrew:1": {}
 	},
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
@@ -25,7 +26,8 @@
 			"extensions": [
 				"ms-azuretools.vscode-docker",
 				"cweijan.vscode-database-client2",
-				"GitHub.vscode-github-actions"
+				"GitHub.vscode-github-actions",
+				"seatonjiang.gitmoji-vscode"
 			]
 		}
 	}
